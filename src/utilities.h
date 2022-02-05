@@ -18,3 +18,5 @@ using NodeBitList = std::vector<bool>;
 
 
 std::ostream& operator<< (std::ostream &out, WeightedVertexGraph const& data);
+
+std::ostream& operator<< (std::ostream &out, NodeBitList const& data);

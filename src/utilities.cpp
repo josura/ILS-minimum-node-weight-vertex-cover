@@ -11,6 +11,17 @@ std::ostream& operator<< (std::ostream &out, WeightedVertexGraph const& data) {
             for(int i = 0; i<data.getNumNodes(); i++){
                 out << "node " << i << " :" << data.getAdjListStr(i) << std::endl;
             }
-            // and so on... 
+            return out;
+        }
+
+
+std::ostream& operator<< (std::ostream &out, NodeBitList const& data) {
+            for(auto it = data.begin() ; it!=data.end(); it++){
+                if(*it){
+                    out << " true ";
+                } else{
+                    out << " false ";
+                }
+            }
             return out;
         }

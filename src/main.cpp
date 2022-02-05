@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -57,7 +58,13 @@ int main(int argc, char** argv)
         NodeBitList* notbitsolution = new NodeBitList{false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
         //bool edgescovered = vertexCoverValidityEdgescheck(graph, solution);
         bool edgescoveredBit = vertexCoverValidityEdgescheckBit(graph, bitSolution);
+        double cost = costFunctionBit(graph, bitSolution);
+        cost = costFunction(graph, solution);
         bool notcoveredBit = vertexCoverValidityEdgescheckBit(graph, notbitsolution);
+
+        NodeBitList* firstSolution = greedySolution(graph);
+        cout << "first solution :" <<  *firstSolution << endl;
+
         input.close();
     }
     cout << endl;
