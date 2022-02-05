@@ -3,10 +3,6 @@
 #include "WeightedVertexGraph.h"
 #include <cstddef>
 
-//do not work
-bool vertexCoverValidityNodescheck(WeightedVertexGraph* graph,NodeList* NodeSubset);
-bool vertexCoverValidityNodescheckBit(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
-
 
 bool vertexCoverValidityEdgescheckBit(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
 
