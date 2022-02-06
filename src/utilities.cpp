@@ -1,5 +1,7 @@
 
 #include "utilities.h"
+#include <cstddef>
+#include <iostream>
 
 using namespace std;
 
@@ -25,3 +27,44 @@ std::ostream& operator<< (std::ostream &out, NodeBitList const& data) {
             }
             return out;
         }
+
+
+std::ostream& operator<< (std::ostream &out, NodeList const& data) {
+            out << "(";
+            for(auto it = data.begin() ; it!=data.end(); it++){
+                out << *it << ",";
+            }
+            out << ")";
+            return out;
+        }
+
+
+std::ostream& operator<< (std::ostream &out, NodeSet const& data) {
+            out << "(";
+            for(auto it = data.begin() ; it!=data.end(); it++){
+                out << *it << ",";
+            }
+            out << ")";
+            return out;
+        }
+
+
+NodeList* nodeBitArrayToList(NodeBitArray const& nodeArray, uint arraySize){
+    NodeList* ret = new NodeList;
+    for(uint i = 0 ; i < arraySize ; i++){
+        if(nodeArray[i]){
+            ret->push_back(i);
+        }
+    }
+    return ret;
+}
+
+void printNodeBitArray(NodeBitArray nodeArray,uint size){
+    for (uint i = 0; i < size; i++) {
+        if(nodeArray[i]){
+            cout << " true ";
+        } else {
+            cout << "false";
+        }
+    }
+}

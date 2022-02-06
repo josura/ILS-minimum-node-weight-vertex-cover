@@ -68,20 +68,16 @@ int main(int argc, char** argv)
         cout << "greedy initial solution weight:" << localSearch->getSolutionWeight() << endl;
 
         auto started = std::chrono::high_resolution_clock::now();
-        NodeBitArray solution2 = localSearch->startResolveOptimized();
+        NodeBitArray solution = localSearch->startResolveOptimized();
         auto done = std::chrono::high_resolution_clock::now();
-        /*cout << "final solution :";
-        for (int i = 0; i< graph->getNumNodes(); i++) {
-            if (solution2[i]) {
-                cout << " true ";
-            }else{
-                cout << " false ";
-            }
-        }
-        cout<<endl;*/
+        
+        NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
+
+        //cout << "final solution: " << *solutionList << endl;
+
         cout << "solution weight:" << localSearch->getSolutionWeight() << endl;
 
-        cout << "execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms" << endl;
+        cout << "execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(done-started).count() << " microseconds" << endl;
 
         input.close();
     }

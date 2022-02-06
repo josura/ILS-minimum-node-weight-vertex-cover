@@ -1,6 +1,7 @@
 #include "heuristics.h"
 #include "utilities.h"
 #include <algorithm>
+#include <cstddef>
 #include <utility>
 
 //controlling all edges
@@ -43,7 +44,16 @@ double costFunction(WeightedVertexGraph* graph,NodeList* NodeSubset){
     return sum;
 }
 
-double costFunctionBitList(WeightedVertexGraph* graph,NodeBitList* NodeSubset){
+double costFunction(WeightedVertexGraph* graph,NodeSet* NodeSubset){
+    double* nodeweights = graph->getNodeWeights();
+    double sum =0;
+    for (auto it =NodeSubset->begin(); it != NodeSubset->end(); it++ ) {
+        sum += nodeweights[*it];
+    }
+    return sum;
+}
+
+double costFunction(WeightedVertexGraph* graph,NodeBitList* NodeSubset){
     //std::transform(NodeSubset->begin(), NodeSubset->end(),)  //TODO simil enumerate for indexes, filtering only true values, and passing It to costFunction
 
     double* nodeweights = graph->getNodeWeights();
@@ -58,7 +68,7 @@ double costFunctionBitList(WeightedVertexGraph* graph,NodeBitList* NodeSubset){
 }
 
 
-double costFunctionBitArray(WeightedVertexGraph* graph,NodeBitArray NodeSubset){
+double costFunction(WeightedVertexGraph* graph,NodeBitArray NodeSubset){
 
     double* nodeweights = graph->getNodeWeights();
     double sum =0;
@@ -90,22 +100,19 @@ NodeBitList* greedySolutionBitList(WeightedVertexGraph *graph){
 }
 
 
-NodeBitArray greedySolutionBitArray(WeightedVertexGraph *graph){
-
-    NodeBitArray ret = new bool[graph->getNumNodes()];
+NodeSet* greedySolutionBitArray(WeightedVertexGraph *graph, NodeBitArray solution){
     std::pair<uint, uint>** edges = graph->getEdgesArray();
-    std::vector<uint> partSol;
-
+    NodeSet* partSol = new NodeSet;
     for (int i =0 ; i < graph->getNumEdges(); i++) {
-        if (std::count(partSol.begin(), partSol.end(), edges[i]->first ) == 0 && std::count(partSol.begin(), partSol.end(), edges[i]->second ) == 0 ) {
-            partSol.push_back(edges[i]->first);
+        if (std::count(partSol->begin(), partSol->end(), edges[i]->first ) == 0 && std::count(partSol->begin(), partSol->end(), edges[i]->second ) == 0 ) {
+            partSol->insert(edges[i]->first);
         }
     }
 
-    for (auto it = partSol.begin(); it != partSol.end(); it++) {
-        ret[*it] = true;
+    for (auto it = partSol->begin(); it != partSol->end(); it++) {
+        solution[*it] = true;
     }
 
-    return ret;
+    return partSol;
 }
 

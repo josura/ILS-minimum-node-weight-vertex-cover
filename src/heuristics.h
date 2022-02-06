@@ -13,8 +13,9 @@ bool vertexCoverValidityEdgescheckBitArray(WeightedVertexGraph* graph,NodeBitArr
 bool vertexCoverValidityEdgescheck(WeightedVertexGraph* graph,NodeList* NodeSubset);
 
 double costFunction(WeightedVertexGraph* graph,NodeList* NodeSubset);
-double costFunctionBitList(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
-double costFunctionBitArray(WeightedVertexGraph* graph,NodeBitArray NodeSubset);
+double costFunction(WeightedVertexGraph* graph,NodeSet* NodeSubset);
+double costFunction(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
+double costFunction(WeightedVertexGraph* graph,NodeBitArray NodeSubset);
 
 NodeBitList* greedySolutionBitList(WeightedVertexGraph* graph);
-NodeBitArray greedySolutionBitArray(WeightedVertexGraph* graph);
+NodeSet* greedySolutionBitArray(WeightedVertexGraph* graph,NodeBitArray solution);
