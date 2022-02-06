@@ -4,7 +4,8 @@ Iterated Local search in production
 # build
 ```bash
 mkdir build
-cmake src
+cd build
+cmake ../src
 make
 ```
 
