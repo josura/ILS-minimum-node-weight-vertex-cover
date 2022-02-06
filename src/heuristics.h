@@ -7,11 +7,14 @@
 #include <utility>
 
 
-bool vertexCoverValidityEdgescheckBit(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
+bool vertexCoverValidityEdgescheckBitList(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
+bool vertexCoverValidityEdgescheckBitArray(WeightedVertexGraph* graph,NodeBitArray NodeSubset);
 
 bool vertexCoverValidityEdgescheck(WeightedVertexGraph* graph,NodeList* NodeSubset);
 
 double costFunction(WeightedVertexGraph* graph,NodeList* NodeSubset);
-double costFunctionBit(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
+double costFunctionBitList(WeightedVertexGraph* graph,NodeBitList* NodeSubset);
+double costFunctionBitArray(WeightedVertexGraph* graph,NodeBitArray NodeSubset);
 
-NodeBitList* greedySolution(WeightedVertexGraph* graph);
+NodeBitList* greedySolutionBitList(WeightedVertexGraph* graph);
+NodeBitArray greedySolutionBitArray(WeightedVertexGraph* graph);

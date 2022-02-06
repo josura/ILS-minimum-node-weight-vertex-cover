@@ -6,7 +6,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <chrono>
 
+#include "LocalSearch.h"
 #include "WeightedVertexGraph.h"
 #include "utilities.h"
 #include "heuristics.h"
@@ -48,22 +50,37 @@ int main(int argc, char** argv)
                 }
             }    
         }
-        graph->makeEdgesArray();
-
-        cout << *graph << endl;
+        graph->makeEdgesArray();  // REALLY IMPORTANT
+        /*
+        //cout << *graph << endl;
         size_t numberNodes = graph->getNumNodes();
         NodeList* solution= new NodeList{1,2,4,5,6,7,8,9,12,14,15,17,18,19};
         NodeBitList* bitSolution = new NodeBitList{false,true,true,false,true,true,true,true,true,true,false,false,true,false,true,true,false,true,true,true};
         NodeList* notsolution= new NodeList{1,2,4};
         NodeBitList* notbitsolution = new NodeBitList{false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
         //bool edgescovered = vertexCoverValidityEdgescheck(graph, solution);
-        bool edgescoveredBit = vertexCoverValidityEdgescheckBit(graph, bitSolution);
-        double cost = costFunctionBit(graph, bitSolution);
+        bool edgescoveredBit = vertexCoverValidityEdgescheckBitList(graph, bitSolution);
+        double cost = costFunctionBitList(graph, bitSolution);
         cost = costFunction(graph, solution);
-        bool notcoveredBit = vertexCoverValidityEdgescheckBit(graph, notbitsolution);
+        bool notcoveredBit = vertexCoverValidityEdgescheckBitList(graph, notbitsolution);
+        */
+        LocalSearch* localSearch = new LocalSearch(graph);
 
-        NodeBitList* firstSolution = greedySolution(graph);
-        cout << "first solution :" <<  *firstSolution << endl;
+        auto started = std::chrono::high_resolution_clock::now();
+        NodeBitArray solution2 = localSearch->startResolveOptimized();
+        auto done = std::chrono::high_resolution_clock::now();
+        /*cout << "final solution :";
+        for (int i = 0; i< graph->getNumNodes(); i++) {
+            if (solution2[i]) {
+                cout << " true ";
+            }else{
+                cout << " false ";
+            }
+        }
+        cout<<endl;*/
+        cout << "solution weight:" << localSearch->getSolutionWeight() << endl;
+
+        cout << "execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms" << endl;
 
         input.close();
     }

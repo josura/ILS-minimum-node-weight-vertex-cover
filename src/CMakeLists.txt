@@ -18,4 +18,5 @@ add_executable(
     WeightedVertexGraph.cpp
     utilities.cpp
     heuristics.cpp
+    LocalSearch.cpp
 )

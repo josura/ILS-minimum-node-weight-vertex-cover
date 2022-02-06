@@ -1,5 +1,6 @@
 #pragma  once
 
+#include <array>
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -15,6 +16,7 @@
 //custom types
 typedef std::vector<uint> NodeList;
 using NodeBitList = std::vector<bool>;
+using NodeBitArray = bool*;
 
 
 std::ostream& operator<< (std::ostream &out, WeightedVertexGraph const& data);
