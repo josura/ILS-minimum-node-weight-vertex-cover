@@ -65,6 +65,7 @@ int main(int argc, char** argv)
         bool notcoveredBit = vertexCoverValidityEdgescheckBitList(graph, notbitsolution);
         */
         LocalSearch* localSearch = new LocalSearch(graph);
+        cout << "greedy initial solution weight:" << localSearch->getSolutionWeight() << endl;
 
         auto started = std::chrono::high_resolution_clock::now();
         NodeBitArray solution2 = localSearch->startResolveOptimized();

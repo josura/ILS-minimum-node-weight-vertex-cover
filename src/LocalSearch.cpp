@@ -33,7 +33,7 @@ NodeBitArray LocalSearch::startResolveOptimized(){
     NodeBitArray candidateSolution = new bool[numNodesGraph];
     double currentMinimumWeight = getSolutionWeight();
     for (int numIter = 0; numIter < numberOfIterations; numIter++) {
-        NodeBitArray previousSolution = solution;
+        double previousMinimumWeight = currentMinimumWeight;
         std::copy(solution, solution + numNodesGraph, candidateSolution);
         for(uint i = 0; i < numNodesGraph ; i++){
             //removing a node from the solution and seeing if it is valid and better than the current solution
@@ -66,7 +66,7 @@ NodeBitArray LocalSearch::startResolveOptimized(){
                 }
             }
         }
-        if(previousSolution == solution){
+        if(previousMinimumWeight <= currentMinimumWeight){
             //local minimum
             delete [] candidateSolution;
             return solution;
