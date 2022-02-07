@@ -13,18 +13,20 @@ class WeightedVertexGraph{
         uint numberOfNodes;
         uint numberOfEdges=0;
         double* nodeWeights;
-        std::unordered_set<uint>** adjList;
-        std::vector<std::pair<uint, uint> >* edgesVector;
-        std::pair<uint, uint>** edgesArray;
+        std::unordered_set<uint>* adjList;
+        std::vector<std::pair<uint, uint> > edgesVector;
+        std::pair<uint, uint>* edgesArray;
 
     public:
+        WeightedVertexGraph();
+
         WeightedVertexGraph(uint numNodes, double* nodeWeights);
 
         ~WeightedVertexGraph();
 
         WeightedVertexGraph* addEdge(uint node1, uint node2);
 
-        std::pair<uint, uint>** makeEdgesArray();
+        std::pair<uint, uint>* makeEdgesArray();
 
         // accessory functions
 
@@ -43,5 +45,10 @@ class WeightedVertexGraph{
 
         std::vector<std::pair<uint, uint>> getEdgesVector()const;
 
-        std::pair<uint, uint>** getEdgesArray()const;
+        std::pair<uint, uint>* getEdgesArray()const;
+
+        // optimization methods
+
+        bool vertexCoverValidityEdgescheckBitArray(bool* nodeSubset);
+
 };

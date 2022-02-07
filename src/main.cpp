@@ -50,7 +50,9 @@ int main(int argc, char** argv)
                 }
             }    
         }
-        graph->makeEdgesArray();  // REALLY IMPORTANT
+        //graph->makeEdgesArray();  // REALLY IMPORTANT
+        
+        
         /*
         //cout << *graph << endl;
         size_t numberNodes = graph->getNumNodes();

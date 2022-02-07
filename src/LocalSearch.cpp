@@ -6,7 +6,8 @@
 LocalSearch::LocalSearch(WeightedVertexGraph* _graph, uint numberOfIterations){
     this->graph = _graph;
     this->solution = new bool[graph->getNumNodes()];
-    this->solutionSet = greedySolutionBitArray(graph,this->solution);
+    this->graph->makeEdgesArray();
+    this->solutionSet = *greedySolutionBitArray(_graph,this->solution);
     this->numberOfIterations = numberOfIterations;
 }
 
@@ -19,7 +20,7 @@ NodeBitArray LocalSearch::getSolution()const{
 }
 
 
-NodeSet* LocalSearch::getSolutionSet()const{
+NodeSet LocalSearch::getSolutionSet()const{
     return solutionSet;
 }
 
@@ -46,7 +47,7 @@ NodeBitArray LocalSearch::startResolve(){
                     if(currentMinimumWeight > candidateWeight){
                         //better solution
                         std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
-                        *solutionSet = *candidateSolutionSet;
+                        solutionSet = *candidateSolutionSet;
                         currentMinimumWeight = candidateWeight;
                     }
                 }
@@ -68,7 +69,7 @@ NodeBitArray LocalSearch::startResolve(){
                             if(currentMinimumWeight > candidateWeight){    
                                 //better solution with sostitution of node i with node j
                                 std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
-                                *solutionSet = *candidateSolutionSet;
+                                solutionSet = *candidateSolutionSet;
                                 currentMinimumWeight = candidateWeight;
                             }
                         }
@@ -174,7 +175,7 @@ NodeBitArray LocalSearch::startResolveOptimized(){
             //removing a node from the solution and seeing if it is valid and better than the current solution
             if(candidateSolution[i]) {
                 candidateSolution[i] = false;
-                if (vertexCoverValidityEdgescheckBitArray(graph,candidateSolution) ) {
+                if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
                     double candidateWeight = currentIterationMinimumWeight - nodeWeights[i];
                     if(currentMinimumWeight > candidateWeight){
                         //better solution
@@ -191,7 +192,7 @@ NodeBitArray LocalSearch::startResolveOptimized(){
                     if(!candidateSolution[j]){
                         candidateSolution[j] = true;
                         candidateSolution[i] = false;
-                        if (vertexCoverValidityEdgescheckBitArray(graph,candidateSolution) ) {
+                        if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
                             double candidateWeight = currentIterationMinimumWeight - nodeWeights[i] + nodeWeights[j] ;
                             if(currentMinimumWeight > candidateWeight){    
                                 //better solution with sostitution of node i with node j

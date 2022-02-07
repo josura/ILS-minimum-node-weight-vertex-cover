@@ -9,25 +9,33 @@
 
 
 bool WeightedVertexGraph::adjNodes(uint node1, uint node2){
-    return ( (adjList[node1]->find(node2) != adjList[node1]->end()) || (adjList[node2]->find(node1) != adjList[node2]->end())) ;
+    return ( (adjList[node1].find(node2) != adjList[node1].end()) || (adjList[node2].find(node1) != adjList[node2].end())) ;
+}
+
+
+WeightedVertexGraph::WeightedVertexGraph(){
+    numberOfNodes = 0;
+    this->nodeWeights = nullptr;
+    adjList = nullptr;
+    
 }
 
 WeightedVertexGraph::WeightedVertexGraph(uint numNodes, double* nodeWeights){
     numberOfNodes = numNodes;
     this->nodeWeights = nodeWeights;
-    adjList = new std::unordered_set<uint>*[numNodes];
-    edgesVector = new std::vector<std::pair<uint, uint>>;
+    adjList = new std::unordered_set<uint>[numNodes];
+    //edgesVector = new std::vector<std::pair<uint, uint>>;
     for (int i = 0; i < numNodes; i++) {
-        adjList[i] = new std::unordered_set<uint>();
+        adjList[i] = std::unordered_set<uint>();
 
     }
     
 }
 
 WeightedVertexGraph::~WeightedVertexGraph(){
-    for (int i=0; i<numberOfNodes; i++) {
-        delete this->adjList[i];
-    }
+    //for (int i=0; i<numberOfNodes; i++) {
+    //    delete this->adjList[i];
+    //}
     delete [] this->adjList;
     
 }
@@ -39,20 +47,19 @@ WeightedVertexGraph* WeightedVertexGraph::addEdge(uint node1, uint node2){
         //edge already added
     } else {
         numberOfEdges++;
-        edgesVector->push_back(std::pair<uint, uint>(node1,node2));
-        adjList[node1]->insert(node2);
-        adjList[node2]->insert(node1);
+        edgesVector.push_back(std::pair<uint, uint>(node1,node2));
+        adjList[node1].insert(node2);
+        adjList[node2].insert(node1);
     }
 
     return this;
 }
 
 
-std::pair<uint, uint>** WeightedVertexGraph::makeEdgesArray(){
-    edgesArray = new std::pair<uint, uint>*[numberOfEdges];
+std::pair<uint, uint>* WeightedVertexGraph::makeEdgesArray(){
+    edgesArray = new std::pair<uint, uint>[numberOfEdges];
     for (int i =0 ; i<numberOfEdges; i++) {
-        edgesArray[i] = new std::pair<uint, uint>;
-        edgesArray[i] = &edgesVector->at(i);
+        edgesArray[i] = edgesVector.at(i);
     }
     return edgesArray;
 }
@@ -86,21 +93,30 @@ std::unordered_set<uint>* WeightedVertexGraph::getAdjList(uint node)const{
         std::cerr << "trying to get an adjacent list of an unknown node: " << node << ">=" << numberOfNodes << std::endl;
         return NULL;
     }
-    return adjList[node];
+    return &adjList[node];
 }
 
 std::string WeightedVertexGraph::getAdjListStr(uint node)const{
     std::string stringa;
-    for(auto it = adjList[node]->cbegin(); it != adjList[node]->cend();it++){
+    for(auto it = adjList[node].cbegin(); it != adjList[node].cend();it++){
                 stringa += std::to_string(*it) + " ";
             }
     return stringa;
 }
 
 std::vector<std::pair<uint, uint>> WeightedVertexGraph::getEdgesVector()const{
-    return *edgesVector;
+    return edgesVector;
 }
 
-std::pair<uint, uint>** WeightedVertexGraph::getEdgesArray()const{
+std::pair<uint, uint>* WeightedVertexGraph::getEdgesArray()const{
     return edgesArray;
+}
+
+//optimization
+
+bool WeightedVertexGraph::vertexCoverValidityEdgescheckBitArray(bool* nodeSubset){
+    for(int i = 0; i < numberOfEdges; ++i){
+        if (!nodeSubset[edgesArray[i].first] && !nodeSubset[edgesArray[i].second] ) return false;
+    }
+    return true;
 }

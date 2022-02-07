@@ -2,30 +2,29 @@
 
 
 #include "WeightedVertexGraph.h"
+#include "LocalSearch.h"
 #include "utilities.h"
 #include "heuristics.h"
 
-class LocalSearch{
+class IteratedLocalSearch{
     private:
         NodeBitArray solution;
 
-        NodeSet solutionSet;
+        NodeSet* solutionSet;
 
         uint numberOfIterations;
 
         WeightedVertexGraph* graph;
 
     public:
-        LocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations=500);
+        IteratedLocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations=500);
 
-        ~LocalSearch();     
+        ~IteratedLocalSearch();     
 
         NodeBitArray startResolve();
-        NodeBitArray startResolveStrange();
-        NodeBitArray startResolveOptimized();
         
         NodeBitArray getSolution()const;
-        NodeSet getSolutionSet()const;
+        NodeSet* getSolutionSet()const;
 
         double getSolutionWeight()const;
 };
