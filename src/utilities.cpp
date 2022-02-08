@@ -59,6 +59,16 @@ NodeList* nodeBitArrayToList(NodeBitArray const& nodeArray, uint arraySize){
     return ret;
 }
 
+NodeSet* nodeBitArrayToSet(NodeBitArray const& nodeArray, uint arraySize){
+    NodeSet* ret = new NodeSet;
+    for(uint i = 0 ; i < arraySize ; i++){
+        if(nodeArray[i]){
+            ret->insert(i);
+        }
+    }
+    return ret;
+}
+
 void printNodeBitArray(NodeBitArray nodeArray,uint size){
     for (uint i = 0; i < size; i++) {
         if(nodeArray[i]){
@@ -67,4 +77,23 @@ void printNodeBitArray(NodeBitArray nodeArray,uint size){
             cout << "false";
         }
     }
+}
+
+
+uint randomNumber(uint min, uint max){
+    std::random_device r;
+    // range [min,max]
+    std::default_random_engine e1(r());
+    std::uniform_int_distribution<uint> uniform_dist(min, max);
+    return uniform_dist(e1);
+}
+
+
+NodeBitArray randomBooleanArray(uint size){
+    NodeBitArray ret = new bool[size];
+    for (uint i = 0; i< size; i++) {
+        ret[i] = (randomNumber(0, 100) >=50) ? false : true;
+    }
+
+    return ret;
 }

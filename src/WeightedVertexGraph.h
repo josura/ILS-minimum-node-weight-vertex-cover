@@ -32,6 +32,7 @@ class WeightedVertexGraph{
 
         uint getNumNodes()const ;
         uint getNumEdges()const ;
+        uint degreeOfNode(uint node)const;
 
         double* getNodeWeights()const;
 
@@ -47,8 +48,12 @@ class WeightedVertexGraph{
 
         std::pair<uint, uint>* getEdgesArray()const;
 
+        double getNodeWeight(uint node)const;
+
         // optimization methods
 
         bool vertexCoverValidityEdgescheckBitArray(bool* nodeSubset);
+
+        double costFunction(bool* NodeSubset);
 
 };

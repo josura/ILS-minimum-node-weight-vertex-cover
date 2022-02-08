@@ -15,6 +15,10 @@ LocalSearch::~LocalSearch(){
     delete [] this->solution;
 }
 
+void LocalSearch::setSolution(NodeBitArray solution){
+    this->solution = solution;
+}
+
 NodeBitArray LocalSearch::getSolution()const{
     return solution;
 }
@@ -25,7 +29,7 @@ NodeSet LocalSearch::getSolutionSet()const{
 }
 
 double LocalSearch::getSolutionWeight()const{
-    return costFunction(graph, solution);
+    return graph->costFunction( solution);
 }
 
 NodeBitArray LocalSearch::startResolve(){
@@ -215,6 +219,74 @@ NodeBitArray LocalSearch::startResolveOptimized(){
             return solution;
         }
     }
+    delete [] candidateSolution;
+    return solution;
+}   
+
+
+NodeBitArray LocalSearch::startResolveOptimized(double &finalCost ,NodeBitArray startSolution){
+    uint numNodesGraph = graph->getNumNodes();
+    double* nodeWeights = graph->getNodeWeights();
+    NodeBitArray candidateSolution = new bool[numNodesGraph];
+    double currentMinimumWeight = getSolutionWeight();
+    //changing solution pointer to startSolution, freeing memory from solution should be done outside of the class
+    if(startSolution)this->solution = startSolution;
+
+    for (int numIter = 0; numIter < numberOfIterations; numIter++) {
+        double currentIterationMinimumWeight = currentMinimumWeight;
+        double previousMinimumWeight = currentMinimumWeight;
+
+        //LOGGING
+        std::cout << "weight for iteration n " << numIter << " : " <<currentMinimumWeight<<std::endl;
+        //LOGGING
+
+        std::copy(solution, solution + numNodesGraph, candidateSolution);
+        for(uint i = 0; i < numNodesGraph ; i++){
+            //removing a node from the solution and seeing if it is valid and better than the current solution
+            if(candidateSolution[i]) {
+                candidateSolution[i] = false;
+                if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
+                    double candidateWeight = currentIterationMinimumWeight - nodeWeights[i];
+                    if(currentMinimumWeight > candidateWeight){
+                        //better solution
+                        std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
+                        currentMinimumWeight = candidateWeight;
+                    }
+                }
+                //reestablishing the original solution
+                candidateSolution[i] = true;
+
+
+                // substitution of 1 element in the solution with another element, only one considered for candidate in the neighborhood
+                for (uint j = i+1; j < numNodesGraph ; j++) {
+                    if(!candidateSolution[j]){
+                        candidateSolution[j] = true;
+                        candidateSolution[i] = false;
+                        if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
+                            double candidateWeight = currentIterationMinimumWeight - nodeWeights[i] + nodeWeights[j] ;
+                            if(currentMinimumWeight > candidateWeight){    
+                                //better solution with sostitution of node i with node j
+                                std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
+                                currentMinimumWeight = candidateWeight;
+                            }
+                        }
+
+                        candidateSolution[j] = false;
+                        candidateSolution[i] = true;
+                    }
+                }
+            }
+        }
+        if(previousMinimumWeight <= currentMinimumWeight){
+            //local minimum
+            std::cout << "local minimum weight: " << currentMinimumWeight << std::endl;
+            std::cout << "iteration: " << numIter << std::endl;
+            delete [] candidateSolution;
+            finalCost = currentMinimumWeight;
+            return solution;
+        }
+    }
+    finalCost = currentMinimumWeight;
     delete [] candidateSolution;
     return solution;
 }   

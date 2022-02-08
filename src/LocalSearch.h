@@ -23,6 +23,9 @@ class LocalSearch{
         NodeBitArray startResolve();
         NodeBitArray startResolveStrange();
         NodeBitArray startResolveOptimized();
+        NodeBitArray startResolveOptimized(double &finalCost,NodeBitArray startSolution=nullptr);
+
+        void setSolution(NodeBitArray solution);
         
         NodeBitArray getSolution()const;
         NodeSet getSolutionSet()const;

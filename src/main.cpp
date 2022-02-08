@@ -39,6 +39,7 @@ int main(int argc, char** argv)
             weightstream >> nodesWeight[i];
         }
 
+
         graph = new WeightedVertexGraph(numNodes,nodesWeight);
 
         for (int i =0; i < numNodes; i++) {
@@ -50,7 +51,8 @@ int main(int argc, char** argv)
                 }
             }    
         }
-        //graph->makeEdgesArray();  // REALLY IMPORTANT
+        input.close();
+        graph->makeEdgesArray();  // REALLY IMPORTANT
         
         
         /*
@@ -66,6 +68,19 @@ int main(int argc, char** argv)
         cost = costFunction(graph, solution);
         bool notcoveredBit = vertexCoverValidityEdgescheckBitList(graph, notbitsolution);
         */
+
+        //GENERATORS OF SOLUTIONS
+        NodeBitArray solution13 = randomBooleanArray(graph->getNumNodes());
+        NodeList* solutionList13 = nodeBitArrayToList(solution13,graph->getNumNodes());
+        cout << "pre array: " << *solutionList13 << endl;
+        delete solutionList13;
+        solution13 = randomSmartSolutionBitArrayFromPartial(graph,solution13 );
+        solutionList13 = nodeBitArrayToList(solution13,graph->getNumNodes());
+        if (vertexCoverValidityEdgescheckBitArray(graph, solution13)) cout << "post array: " << *solutionList13 << endl;
+
+
+
+        //LOCAL SEARCH HILL CLIMBING TESTING
         LocalSearch* localSearch = new LocalSearch(graph);
         cout << "greedy initial solution weight:" << localSearch->getSolutionWeight() << endl;
 
@@ -75,13 +90,13 @@ int main(int argc, char** argv)
         
         NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
 
-        //cout << "final solution: " << *solutionList << endl;
+        //if(vertexCoverValidityEdgescheckBitArray(graph, solution))
+        //    cout << "final solution: " << *solutionList << endl;
 
         cout << "solution weight:" << localSearch->getSolutionWeight() << endl;
 
         cout << "execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(done-started).count() << " microseconds" << endl;
 
-        input.close();
     }
     cout << endl;
 

@@ -40,6 +40,10 @@ WeightedVertexGraph::~WeightedVertexGraph(){
     
 }
 
+uint WeightedVertexGraph::degreeOfNode(uint node)const{
+    return adjList[node].size();
+}
+
 WeightedVertexGraph* WeightedVertexGraph::addEdge(uint node1, uint node2){
     if(node1 >= numberOfNodes || node2 >= numberOfNodes){
         std::cerr << "add edge failed for edges " << node1 << " and " << node2 << std::endl;
@@ -119,4 +123,18 @@ bool WeightedVertexGraph::vertexCoverValidityEdgescheckBitArray(bool* nodeSubset
         if (!nodeSubset[edgesArray[i].first] && !nodeSubset[edgesArray[i].second] ) return false;
     }
     return true;
+}
+
+double WeightedVertexGraph::costFunction(bool* NodeSubset){
+    double sum =0;
+    for (uint i = 0 ; i < numberOfNodes ;i++ ) {
+        if (NodeSubset[i]) {
+            sum += nodeWeights[i];
+        }
+    }
+    return sum;
+}
+
+double WeightedVertexGraph::getNodeWeight(uint node)const{
+    return nodeWeights[node];
 }
