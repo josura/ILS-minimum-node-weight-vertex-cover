@@ -2,6 +2,7 @@
 #include "utilities.h"
 #include <cstddef>
 #include <iostream>
+#include <random>
 
 using namespace std;
 
@@ -88,6 +89,13 @@ uint randomNumber(uint min, uint max){
     return uniform_dist(e1);
 }
 
+double randomRealNumber(double min, double max){
+    std::random_device r;
+    // range [min,max]
+    std::default_random_engine e1(r());
+    std::uniform_real_distribution<double> uniform_dist(min, max);
+    return uniform_dist(e1);
+}
 
 NodeBitArray randomBooleanArray(uint size){
     NodeBitArray ret = new bool[size];

@@ -46,10 +46,10 @@ class IteratedLocalSearch{
 
         NodeBitArray simplePerturbationSolution(NodeBitArray solution);
 
-        double adjustPerturbationPowerAndRarity();
+        void adjustPerturbationPowerAndRarity(uint iterationWithoutImprovement, uint iterationWithImprovement);
 
 
-        double adjustProbabilityOfBadSolutions();
+        void adjustProbabilityOfBadSolutions(uint iterationWithoutImprovement, uint iterationWithImprovement,uint badSolutionsAccepted);
 
         NodeBitArray startResolve();
         

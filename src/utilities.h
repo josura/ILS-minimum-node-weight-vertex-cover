@@ -35,5 +35,6 @@ NodeSet* nodeBitArrayToSet(NodeBitArray const& nodeArray,uint arraySize);
 void printNodeBitArray(NodeBitArray nodeArray,uint size);
 
 uint randomNumber(uint min, uint max);
+double randomRealNumber(double min, double max);
 
 NodeBitArray randomBooleanArray(uint size);

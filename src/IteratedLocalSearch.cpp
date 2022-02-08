@@ -3,6 +3,8 @@
 #include "LocalSearch.h"
 #include "utilities.h"
 #include <array>
+#include <iostream>
+#include <ostream>
 IteratedLocalSearch::IteratedLocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations, uint numberofIterationsWithouthImprovement, double startingPower, double startingRarity, double startingProbabilityBadSolution){
     this->graph = _graph;
     this->power = startingPower;
@@ -24,23 +26,34 @@ NodeBitArray IteratedLocalSearch::simplePerturbationSolution(NodeBitArray soluti
     return ret;
 }
 
-double IteratedLocalSearch::adjustPerturbationPowerAndRarity(){
+void IteratedLocalSearch::adjustPerturbationPowerAndRarity(uint iterationWithoutImprovement, uint iterationWithImprovement){
 
 }
 
 
-double IteratedLocalSearch::adjustProbabilityOfBadSolutions(){
+void IteratedLocalSearch::adjustProbabilityOfBadSolutions(uint iterationWithoutImprovement, uint iterationWithImprovement,uint badSolutionsAccepted){
 
 }
 
 NodeBitArray IteratedLocalSearch::startResolve(){
-    solution = localSearchMethod->startResolveOptimized(solutionCost);
+    solution = localSearchMethod->startResolveWithLimit(solutionCost);
     for (uint i = 0; i < maxNumberOfIterations; i++) {
         NodeBitArray perturbedSolutionBefore = simplePerturbationSolution(solution);
+        perturbedSolutionBefore = randomSmartSolutionBitArrayFromPartial(graph, perturbedSolutionBefore);
         double perturbedSolutionCost;
-        NodeBitArray perturbedSolutionAfter = localSearchMethod->startResolveOptimized(perturbedSolutionCost); 
-        
-        if(perturbedSolutionCost<solutionCost || ){
+        NodeBitArray perturbedSolutionAfter = localSearchMethod->startResolveWithLimit(perturbedSolutionCost,perturbedSolutionBefore); 
+        if (!perturbedSolutionAfter) {
+            std::cout << "maximum number of objective function evaluation reached"<<std::endl;
+            if(perturbedSolutionCost<solutionCost ){
+                solutionCost = perturbedSolutionCost;
+                std::swap(solution,perturbedSolutionAfter);
+                delete [] perturbedSolutionAfter;
+            }
+            std::cout << "cost of the solution found: "<< solutionCost <<std::endl;
+            return solution;
+        }
+        double testBadSolution = randomRealNumber(0, 100) ;
+        if(testBadSolution < probabilityBadSolution  || perturbedSolutionCost<solutionCost ){
             solutionCost = perturbedSolutionCost;
             std::swap(solution,perturbedSolutionAfter);
             delete [] perturbedSolutionAfter;
@@ -49,13 +62,14 @@ NodeBitArray IteratedLocalSearch::startResolve(){
         }
         
     }
+    return solution;
 
 }
 
 NodeBitArray IteratedLocalSearch::getSolution()const{
-
+    return solution;
 }
 
-double getSolutionWeight()const{
-
+double IteratedLocalSearch::getSolutionWeight()const{
+    return graph->costFunction(solution);
 }
