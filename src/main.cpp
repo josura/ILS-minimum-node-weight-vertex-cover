@@ -9,6 +9,7 @@
 #include <vector>
 #include <chrono>
 
+#include "IteratedLocalSearch.h"
 #include "LocalSearch.h"
 #include "WeightedVertexGraph.h"
 #include "utilities.h"
@@ -23,7 +24,7 @@ int main(int argc, char** argv)
     WeightedVertexGraph* graph;
     ifstream input (argv[1]);
     if (input.fail()) {
-        cerr << "input failed";
+        cerr <<"[MAIN]: "<< "input failed";
     }
     if (input.is_open())
     {
@@ -84,13 +85,28 @@ int main(int argc, char** argv)
 
 
         //LOCAL SEARCH HILL CLIMBING TESTING
-        LocalSearch* localSearch = new LocalSearch(graph);
-        cout << "greedy initial solution weight:" << localSearch->getSolutionWeight() << endl;
+        // LocalSearch* localSearch = new LocalSearch(graph);
+        // cout << "greedy initial solution weight:" << localSearch->getSolutionWeight() << endl;
 
-        double cost;
+        // double cost;
+
+        // auto started = std::chrono::high_resolution_clock::now();
+        // NodeBitArray solution = localSearch->startResolveWithLimit(cost);
+        // auto done = std::chrono::high_resolution_clock::now();
+        
+        // //NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
+
+        // //if(vertexCoverValidityEdgescheckBitArray(graph, solution))
+        // //    cout << "final solution: " << *solutionList << endl;
+
+        // cout << "solution weight:" << localSearch->getSolutionWeight() << " algorithm weight"<< cost << endl;
+
+        // cout << "execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(done-started).count() << " microseconds" << endl;
+        //ILS testing
+        IteratedLocalSearch* ILS = new IteratedLocalSearch(graph);
 
         auto started = std::chrono::high_resolution_clock::now();
-        NodeBitArray solution = localSearch->startResolveWithLimit(cost);
+        NodeBitArray solution = ILS->startResolve();
         auto done = std::chrono::high_resolution_clock::now();
         
         //NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
@@ -98,9 +114,9 @@ int main(int argc, char** argv)
         //if(vertexCoverValidityEdgescheckBitArray(graph, solution))
         //    cout << "final solution: " << *solutionList << endl;
 
-        cout << "solution weight:" << localSearch->getSolutionWeight() << " algorithm weight"<< cost << endl;
+        cout <<"[MAIN]: "<< "solution weight:" << ILS->getSolutionWeight() << endl;
 
-        cout << "execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(done-started).count() << " microseconds" << endl;
+        cout <<"[MAIN]: "<< "execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(done-started).count() << " microseconds" << endl;
 
     }
     cout << endl;

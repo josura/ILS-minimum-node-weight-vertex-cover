@@ -39,7 +39,7 @@ class IteratedLocalSearch{
         IteratedLocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations=500, uint numberofIterationsWithouthImprovement=5, 
             double startingPower=10, 
             double startingRarity = 50, 
-            double startingProbabilityBadSolution=5
+            double startingProbabilityBadSolution=0
         );
 
         ~IteratedLocalSearch();     

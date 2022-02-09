@@ -1,10 +1,13 @@
 #include "LocalSearch.h"
 #include "utilities.h"
 #include <iostream>
+#include <new>
 #include <ostream>
+#include <vector>
 
-LocalSearch::LocalSearch(WeightedVertexGraph* _graph, uint numberOfIterations){
+LocalSearch::LocalSearch(WeightedVertexGraph* _graph, uint numberOfIterations, double samplingFactor){
     this->graph = _graph;
+    this->samplingFactor = samplingFactor;
     this->solution = new bool[graph->getNumNodes()];
     this->graph->makeEdgesArray();
     this->solutionSet = *greedySolutionBitArray(_graph,this->solution);
@@ -233,6 +236,7 @@ NodeBitArray LocalSearch::startResolveOptimized(double &finalCost ,NodeBitArray 
     double currentMinimumWeight = getSolutionWeight();
     //changing solution pointer to startSolution, freeing memory from solution should be done outside of the class
     if(startSolution)this->solution = startSolution;
+    else{this->solution = new bool[numNodesGraph];}
 
     for (int numIter = 0; numIter < numberOfIterations; numIter++) {
         double currentIterationMinimumWeight = currentMinimumWeight;
@@ -261,7 +265,8 @@ NodeBitArray LocalSearch::startResolveOptimized(double &finalCost ,NodeBitArray 
 
                 // substitution of 1 element in the solution with another element, only one considered for candidate in the neighborhood
                 for (uint j = i+1; j < numNodesGraph ; j++) {
-                    if(!candidateSolution[j]){
+                    //if(!candidateSolution[j]){   //C++ has gone mad because this condition passes sometimes when It should not
+                    if(candidateSolution[j] == false){
                         candidateSolution[j] = true;
                         candidateSolution[i] = false;
                         if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
@@ -298,16 +303,20 @@ NodeBitArray LocalSearch::startResolveWithLimit(double &finalCost ,NodeBitArray 
     uint numNodesGraph = graph->getNumNodes();
     double* nodeWeights = graph->getNodeWeights();
     NodeBitArray candidateSolution = new bool[numNodesGraph];
-    double currentMinimumWeight = getSolutionWeight();
     //changing solution pointer to startSolution, freeing memory from solution should be done outside of the class
     if(startSolution)this->solution = startSolution;
+    else{ 
+        solution = new bool[numNodesGraph];
+        this->solution = randomSmartSolutionBitArrayFromPartial(graph, solution);
+    }
+    double currentMinimumWeight = getSolutionWeight();
 
     for (int numIter = 0; numIter < numberOfIterations; numIter++) {
         double currentIterationMinimumWeight = currentMinimumWeight;
         double previousMinimumWeight = currentMinimumWeight;
 
         //LOGGING
-        std::cout << "weight for iteration n " << numIter << " : " <<currentMinimumWeight<<std::endl;
+        std::cout <<"[LSEA]: "<< "weight for iteration n " << numIter << " : " <<currentMinimumWeight<<std::endl;
         //LOGGING
 
         std::copy(solution, solution + numNodesGraph, candidateSolution);
@@ -328,11 +337,11 @@ NodeBitArray LocalSearch::startResolveWithLimit(double &finalCost ,NodeBitArray 
                     }
                     
                     if (currentObjectiveFunEvalution >= maximumObjectiveFunEvalution) {
-                        std::cout << "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (removal), LEAVING METHOD " << currentMinimumWeight << std::endl;
+                        std::cout <<"[LSEA]: "<< "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (removal), LEAVING METHOD " << currentMinimumWeight << std::endl;
                         if(previousMinimumWeight <= currentMinimumWeight){
                             //local minimum
-                            std::cout << "local minimum weight: " << currentMinimumWeight << std::endl;
-                            std::cout << "iteration: " << numIter << std::endl;
+                            std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+                            std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
                             finalCost = currentMinimumWeight;
                             return solution;
                         }
@@ -364,11 +373,11 @@ NodeBitArray LocalSearch::startResolveWithLimit(double &finalCost ,NodeBitArray 
                             }
 
                             if (currentObjectiveFunEvalution >= maximumObjectiveFunEvalution) {
-                                std::cout << "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (substitution), LEAVING METHOD " << currentMinimumWeight << std::endl;
+                                std::cout <<"[LSEA]: "<< "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (substitution), LEAVING METHOD " << currentMinimumWeight << std::endl;
                                 if(previousMinimumWeight <= currentMinimumWeight){
                                     //local minimum
-                                    std::cout << "local minimum weight: " << currentMinimumWeight << std::endl;
-                                    std::cout << "iteration: " << numIter << std::endl;
+                                    std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+                                    std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
                                     finalCost = currentMinimumWeight;
                                     return solution;
                                 }
@@ -385,8 +394,123 @@ NodeBitArray LocalSearch::startResolveWithLimit(double &finalCost ,NodeBitArray 
         }
         if(previousMinimumWeight <= currentMinimumWeight){
             //local minimum
-            std::cout << "local minimum weight: " << currentMinimumWeight << std::endl;
-            std::cout << "iteration: " << numIter << std::endl;
+            std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+            std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
+            delete [] candidateSolution;
+            finalCost = currentMinimumWeight;
+            return solution;
+        }
+    }
+    finalCost = currentMinimumWeight;
+    delete [] candidateSolution;
+    return solution;
+}   
+
+
+NodeBitArray LocalSearch::startResolveWithLimitAndSampling(double &finalCost ,NodeBitArray startSolution){
+    uint numNodesGraph = graph->getNumNodes();
+    double* nodeWeights = graph->getNodeWeights();
+    NodeBitArray candidateSolution = new bool[numNodesGraph];
+    if(startSolution)this->solution = startSolution;
+    else{ 
+        solution = new bool[numNodesGraph];
+        this->solution = randomSmartSolutionBitArrayFromPartial(graph, solution);
+    }
+    double currentMinimumWeight = getSolutionWeight();
+
+    for (int numIter = 0; numIter < numberOfIterations; numIter++) {
+        double currentIterationMinimumWeight = currentMinimumWeight;
+        double previousMinimumWeight = currentMinimumWeight;
+
+        //LOGGING
+        std::cout <<"[LSEA]: "<< "weight for iteration n " << numIter << " : " <<currentMinimumWeight<<std::endl;
+        //LOGGING
+
+        std::copy(solution, solution + numNodesGraph, candidateSolution);
+
+        std::vector<uint> nodeInCandidateSolution;
+        std::vector<uint> nodeNotInCandidateSolution;
+        for (uint i = 0; i < numNodesGraph; i++) {
+            if(candidateSolution[i]) nodeInCandidateSolution.push_back(i);
+            else nodeNotInCandidateSolution.push_back(i);
+        }
+
+        for(uint i = 0; i < numNodesGraph ; i++){
+            //removing a node from the solution and seeing if it is valid and better than the current solution
+            if(candidateSolution[i]) {
+                candidateSolution[i] = false;
+                if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
+                    double candidateWeight = currentIterationMinimumWeight - nodeWeights[i];
+                    //OBJECTIVE FUNCTION EVALUATION
+                    currentObjectiveFunEvalution++;
+                    //OBJECTIVE FUNCTION EVALUATION
+                    
+                    if(currentMinimumWeight > candidateWeight){
+                        //better solution
+                        std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
+                        currentMinimumWeight = candidateWeight;
+                    }
+                    
+                    if (currentObjectiveFunEvalution >= maximumObjectiveFunEvalution) {
+                        std::cout <<"[LSEA]: "<< "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (removal), LEAVING METHOD " << currentMinimumWeight << std::endl;
+                        if(previousMinimumWeight <= currentMinimumWeight){
+                            //local minimum
+                            std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+                            std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
+                            finalCost = currentMinimumWeight;
+                            return solution;
+                        }
+                        delete [] candidateSolution;
+                        return nullptr;
+                    }
+                    
+                }
+                //reestablishing the original solution
+                candidateSolution[i] = true;
+
+
+                // substitution of 1 element in the solution with another element, only one considered for candidate in the neighborhood
+                for (uint j = i+1; j < numNodesGraph ; j++) {
+                    //if(!candidateSolution[j]){   //C++ has gone mad because this condition passes sometimes when It should not
+                    if(candidateSolution[j] == false){
+                        candidateSolution[j] = true;
+                        candidateSolution[i] = false;
+                        if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
+                            double candidateWeight = currentIterationMinimumWeight - nodeWeights[i] + nodeWeights[j] ;
+                            //OBJECTIVE FUNCTION EVALUATION
+                            currentObjectiveFunEvalution++;
+                            //OBJECTIVE FUNCTION EVALUATION
+
+                            if(currentMinimumWeight > candidateWeight){    
+                                //better solution with sostitution of node i with node j
+                                std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
+                                currentMinimumWeight = candidateWeight;
+                            }
+
+                            if (currentObjectiveFunEvalution >= maximumObjectiveFunEvalution) {
+                                std::cout <<"[LSEA]: "<< "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (substitution), LEAVING METHOD " << currentMinimumWeight << std::endl;
+                                if(previousMinimumWeight <= currentMinimumWeight){
+                                    //local minimum
+                                    std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+                                    std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
+                                    finalCost = currentMinimumWeight;
+                                    return solution;
+                                }
+                                delete [] candidateSolution;
+                                return nullptr;
+                            }
+                        }
+
+                        candidateSolution[j] = false;
+                        candidateSolution[i] = true;
+                    }
+                }
+            }
+        }
+        if(previousMinimumWeight <= currentMinimumWeight){
+            //local minimum
+            std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+            std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
             delete [] candidateSolution;
             finalCost = currentMinimumWeight;
             return solution;

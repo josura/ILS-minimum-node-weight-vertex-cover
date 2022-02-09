@@ -19,8 +19,10 @@ class LocalSearch{
 
         uint maximumObjectiveFunEvalution = 20000;
 
+        double samplingFactor;
+
     public:
-        LocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations=500);
+        LocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations=500,double samplingFactor=100);
 
         ~LocalSearch();     
 
@@ -29,6 +31,7 @@ class LocalSearch{
         NodeBitArray startResolveOptimized();
         NodeBitArray startResolveOptimized(double &finalCost,NodeBitArray startSolution=nullptr);
         NodeBitArray startResolveWithLimit(double &finalCost,NodeBitArray startSolution=nullptr);
+        NodeBitArray startResolveWithLimitAndSampling(double &finalCost,NodeBitArray startSolution=nullptr);
 
         void setSolution(NodeBitArray solution);
         

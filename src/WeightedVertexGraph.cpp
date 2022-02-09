@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iterator>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -119,6 +120,9 @@ std::pair<uint, uint>* WeightedVertexGraph::getEdgesArray()const{
 //optimization
 
 bool WeightedVertexGraph::vertexCoverValidityEdgescheckBitArray(bool* nodeSubset){
+    if (!nodeSubset) {
+        throw std::invalid_argument("cost function on null pointer");
+    }
     for(int i = 0; i < numberOfEdges; ++i){
         if (!nodeSubset[edgesArray[i].first] && !nodeSubset[edgesArray[i].second] ) return false;
     }
@@ -126,6 +130,9 @@ bool WeightedVertexGraph::vertexCoverValidityEdgescheckBitArray(bool* nodeSubset
 }
 
 double WeightedVertexGraph::costFunction(bool* NodeSubset){
+    if (!NodeSubset) {
+        throw std::invalid_argument("cost function on null pointer");
+    }
     double sum =0;
     for (uint i = 0 ; i < numberOfNodes ;i++ ) {
         if (NodeSubset[i]) {

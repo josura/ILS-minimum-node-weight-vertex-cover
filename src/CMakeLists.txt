@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 #including values
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
@@ -17,5 +17,5 @@ add_executable(
     utilities.cpp
     heuristics.cpp
     LocalSearch.cpp
-    #IteratedLocalSearch.cpp
+    IteratedLocalSearch.cpp
 )
