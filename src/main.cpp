@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -52,7 +53,6 @@ int main(int argc, char** argv)
             }    
         }
         input.close();
-        graph->makeEdgesArray();  // REALLY IMPORTANT
         
         
         /*
@@ -70,30 +70,35 @@ int main(int argc, char** argv)
         */
 
         //GENERATORS OF SOLUTIONS
-        NodeBitArray solution13 = randomBooleanArray(graph->getNumNodes());
+        /*graph->makeEdgesArray();  // REALLY IMPORTANT
+        //NodeBitArray solution13 = randomBooleanArray(graph->getNumNodes());
+        NodeBitArray solution13 = new bool[graph->getNumNodes()];  
+        fill_n(solution13, graph->getNumNodes(), false);
         NodeList* solutionList13 = nodeBitArrayToList(solution13,graph->getNumNodes());
         cout << "pre array: " << *solutionList13 << endl;
         delete solutionList13;
         solution13 = randomSmartSolutionBitArrayFromPartial(graph,solution13 );
         solutionList13 = nodeBitArrayToList(solution13,graph->getNumNodes());
         if (vertexCoverValidityEdgescheckBitArray(graph, solution13)) cout << "post array: " << *solutionList13 << endl;
-
+        */
 
 
         //LOCAL SEARCH HILL CLIMBING TESTING
         LocalSearch* localSearch = new LocalSearch(graph);
         cout << "greedy initial solution weight:" << localSearch->getSolutionWeight() << endl;
 
+        double cost;
+
         auto started = std::chrono::high_resolution_clock::now();
-        NodeBitArray solution = localSearch->startResolveOptimized();
+        NodeBitArray solution = localSearch->startResolveWithLimit(cost);
         auto done = std::chrono::high_resolution_clock::now();
         
-        NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
+        //NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
 
         //if(vertexCoverValidityEdgescheckBitArray(graph, solution))
         //    cout << "final solution: " << *solutionList << endl;
 
-        cout << "solution weight:" << localSearch->getSolutionWeight() << endl;
+        cout << "solution weight:" << localSearch->getSolutionWeight() << " algorithm weight"<< cost << endl;
 
         cout << "execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(done-started).count() << " microseconds" << endl;
 

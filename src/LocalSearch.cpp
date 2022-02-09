@@ -9,6 +9,7 @@ LocalSearch::LocalSearch(WeightedVertexGraph* _graph, uint numberOfIterations){
     this->graph->makeEdgesArray();
     this->solutionSet = *greedySolutionBitArray(_graph,this->solution);
     this->numberOfIterations = numberOfIterations;
+    this->currentObjectiveFunEvalution = 0;
 }
 
 LocalSearch::~LocalSearch(){
@@ -346,7 +347,8 @@ NodeBitArray LocalSearch::startResolveWithLimit(double &finalCost ,NodeBitArray 
 
                 // substitution of 1 element in the solution with another element, only one considered for candidate in the neighborhood
                 for (uint j = i+1; j < numNodesGraph ; j++) {
-                    if(!candidateSolution[j]){
+                    //if(!candidateSolution[j]){   //C++ has gone mad because this condition passes sometimes when It should not
+                    if(candidateSolution[j] == false){
                         candidateSolution[j] = true;
                         candidateSolution[i] = false;
                         if (graph->vertexCoverValidityEdgescheckBitArray(candidateSolution) ) {
