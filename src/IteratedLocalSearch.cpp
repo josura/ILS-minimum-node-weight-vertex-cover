@@ -36,7 +36,7 @@ NodeBitArray IteratedLocalSearch::simplePerturbationSolution(NodeBitArray soluti
         }
     }
 
-    return randomSmartSolutionBitArrayFromPartial(graph, ret);
+    return randomGreedySolutionBitArrayFromPartial(graph, ret);
 }
 
 void IteratedLocalSearch::adjustPerturbationPowerAndRarity(uint iterationWithoutImprovement, uint iterationWithImprovement){
@@ -54,7 +54,8 @@ void IteratedLocalSearch::adjustProbabilityOfBadSolutions(uint iterationWithoutI
 }
 
 NodeBitArray IteratedLocalSearch::startResolve(){
-    solution = localSearchMethod->startResolveWithLimit(solutionCost);
+    solution = localSearchMethod->startResolveWithLimitAndSampling(solutionCost);
+    solutionCost = graph->costFunction(solution);
     uint iterationWithImprovement = 0 , iterationWithoutImprovement = 0 , badSolutionsAccepted = 0;
     for (uint i = 0; i < maxNumberOfIterations && (iterationWithoutImprovement < maxNumberOfIterationsWithouthImprovement); i++) {
         NodeBitArray perturbedSolutionBefore = simplePerturbationSolution(solution);
@@ -62,9 +63,9 @@ NodeBitArray IteratedLocalSearch::startResolve(){
         std::cout <<" [ILS]: "<< "\t weight of perturbed solution before localSearch : " << graph->costFunction(perturbedSolutionBefore)<< std::endl;
 
         double perturbedSolutionCost;
-        NodeBitArray perturbedSolutionAfter = localSearchMethod->startResolveWithLimit(perturbedSolutionCost,perturbedSolutionBefore); 
-        std::cout <<" [ILS]: "<< "\t weight of perturbed solution after  localSearch : " << graph->costFunction(perturbedSolutionAfter)<< std::endl<<std::endl;
+        NodeBitArray perturbedSolutionAfter = localSearchMethod->startResolveWithLimitAndSampling(perturbedSolutionCost,perturbedSolutionBefore); 
         if (!perturbedSolutionAfter) {
+            perturbedSolutionAfter = localSearchMethod->getSolution();
             std::cout <<" [ILS]: "<< "maximum number of objective function evaluation reached"<<std::endl;
             if(perturbedSolutionCost<solutionCost ){
                 solutionCost = perturbedSolutionCost;
@@ -74,6 +75,7 @@ NodeBitArray IteratedLocalSearch::startResolve(){
             std::cout <<" [ILS]: "<< "cost of the solution found: "<< solutionCost <<std::endl;
             return solution;
         }
+        std::cout <<" [ILS]: "<< "\t weight of perturbed solution after  localSearch : " << graph->costFunction(perturbedSolutionAfter)<< std::endl<<std::endl;
         double testBadSolution = randomRealNumber(0, 100) ;
         if(testBadSolution < probabilityBadSolution  || perturbedSolutionCost<solutionCost ){
             if (testBadSolution < probabilityBadSolution && perturbedSolutionCost>=solutionCost) {
