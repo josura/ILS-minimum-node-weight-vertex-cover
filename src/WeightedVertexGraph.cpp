@@ -193,6 +193,18 @@ std::vector<uint> WeightedVertexGraph::getSwappablesOut(std::vector<uint>& nodes
     return swappables;
 }
 
+std::vector<uint> WeightedVertexGraph::getSwappablesOutOptimized(std::vector<uint>& nodes,bool* solution){
+    std::vector<uint> candidateSwappables = getSharedAdjacentNodes(nodes);
+    std::vector<uint> swappables;
+    for (auto it = candidateSwappables.begin(); it!=candidateSwappables.end(); it++) {
+        std::vector<uint> node{*it};
+        std::vector<uint> adjacentNodeRemovables = getSwappablesOut(node, solution);
+        if(solution[*it] && adjacentNodeRemovables.size()==0){
+            swappables.push_back(*it);
+        }
+    }
+    return swappables;
+}
 
 uint WeightedVertexGraph::getMaxDegree()const{
     uint max = 0;

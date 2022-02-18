@@ -1143,6 +1143,250 @@ NodeBitArray LocalSearch::startResolveFinal(double &finalCost ,NodeBitArray star
     return solution;
 }   
 
+//NOT WORKING since the control over adjacent edges should be more constrained
+NodeBitArray LocalSearch::startResolveFinalOptimized(double &finalCost ,NodeBitArray startSolution){
+    uint numNodesGraph = graph->getNumNodes();
+    double* nodeWeights = graph->getNodeWeights();
+    NodeBitArray candidateSolution = new bool[numNodesGraph];
+    if(startSolution)this->solution = startSolution;
+    else{ 
+        solution = new bool[numNodesGraph];
+        for (uint i = 0; i<numNodesGraph; i++) {
+            solution[i] = false;
+        }
+        this->solution = randomSmartSolutionBitArrayFromPartial(graph, solution);
+        std::cout <<"[LSEA]: "<< "greedy starting solution cost : " << graph->costFunction(this->solution)<<std::endl;
+    }
+    double currentMinimumWeight = getSolutionWeight();
+
+    //TESTING
+    uint removeValidi=0,swapValidi=0,hybridValidi=0;
+    //TESTING
+
+    int sampleSizeOpt = std::ceil( numNodesGraph * (samplingFactor/100.0));
+
+
+    for (int numIter = 0; numIter < numberOfIterations; numIter++) {
+        double previousMinimumWeight = currentMinimumWeight;
+
+        //LOGGING
+        //std::cout <<"[LSEA]: "<< "weight for iteration n " << numIter << " : " <<currentMinimumWeight<<std::endl;
+        //LOGGING
+
+        std::copy(solution, solution + numNodesGraph, candidateSolution);
+
+        std::vector<uint> nodeInCandidateSolution;
+        std::vector<uint> nodeNotInCandidateSolution;
+        std::vector<uint>  nodeRemovedFromCandidateSolution;
+        for (uint i = 0; i < numNodesGraph; i++) {
+            if(candidateSolution[i]) {
+                nodeInCandidateSolution.push_back(i);
+            } else {
+                nodeNotInCandidateSolution.push_back(i);
+            }
+        }
+
+        int currentNumberSamples = 0;
+
+        //remove nodes from the solution to create a part of the neighbourhood
+        while ((currentNumberSamples)<sampleSizeOpt && nodeInCandidateSolution.size()>0) {
+            uint indexRemoved1 = randomNumber(0, nodeInCandidateSolution.size());
+            std::vector<uint> nodeRemoved{nodeInCandidateSolution[indexRemoved1]};
+            nodeInCandidateSolution.erase(nodeInCandidateSolution.begin()+indexRemoved1);
+            nodeRemovedFromCandidateSolution.push_back(nodeRemoved[0]);
+            candidateSolution[nodeRemoved[0]] = false;
+
+            if(graph->vertexCoverValidityNodesRemoved(candidateSolution,nodeRemoved) && previousMinimumWeight-nodeWeights[nodeRemoved[0]]<currentMinimumWeight){
+            //if(graph->vertexCoverValidityNodesRemoved(candidateSolution, nodeRemoved)){ 
+                double candidateWeight = previousMinimumWeight - nodeWeights[nodeRemoved[0]];
+                //TESTING
+                removeValidi++;
+                // uint testWeight = graph->costFunction(candidateSolution);
+                // std::cout << "candidate weight in remove : "<<candidateWeight<<std::endl;
+                // std::cout << "test weight in remove : "<<testWeight<<std::endl<<std::endl;
+                //TESTING
+                if(currentMinimumWeight > candidateWeight){
+                    //better solution
+                    std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
+                    currentMinimumWeight = candidateWeight;
+                }
+
+                currentNumberSamples++;
+                currentObjectiveFunEvalution++;
+
+                if (currentObjectiveFunEvalution >= maximumObjectiveFunEvalution) {
+                    std::cout <<"[LSEA]: "<< "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (remove), LEAVING METHOD " << currentMinimumWeight << std::endl;
+                    if(previousMinimumWeight <= currentMinimumWeight){
+                        //local minimum
+                        std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+                        std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
+                        finalCost = currentMinimumWeight;
+                        return nullptr;
+                    }
+                    delete [] candidateSolution;
+                    return nullptr;
+                }
+            
+            }
+            candidateSolution[nodeRemoved[0]] = true;
+
+        }
+
+        //reinserting node removed from candidate solution
+        for (uint i = 0; i<nodeRemovedFromCandidateSolution.size(); i++) {
+            nodeInCandidateSolution.push_back(nodeRemovedFromCandidateSolution[i]);
+        }
+        nodeRemovedFromCandidateSolution.clear();
+
+        //1 node removed and its neighbors are added to the solution
+        while ((currentNumberSamples - sampleSizeOpt)<sampleSizeOpt && nodeInCandidateSolution.size() > 0) {
+            uint indexRemoved = randomNumber(0, nodeInCandidateSolution.size());
+            std::vector<uint> nodeRemoved{nodeInCandidateSolution[indexRemoved]};
+            std::vector<uint> candidateSwappables = graph->getSwappablesIn(nodeRemoved, candidateSolution);
+            nodeInCandidateSolution.erase(nodeInCandidateSolution.begin()+indexRemoved);
+            nodeRemovedFromCandidateSolution.push_back(nodeRemoved[0]);
+            double insertedWeight = 0;
+            for (auto indexSwap = candidateSwappables.begin(); indexSwap != candidateSwappables.end() ; indexSwap++) {
+                candidateSolution[*indexSwap] = true;
+                insertedWeight+=nodeWeights[*indexSwap];
+            }
+            candidateSolution[nodeRemoved[0]] = false;            
+                
+            if(nodeWeights[nodeRemoved[0]]>insertedWeight && graph->vertexCoverValidityNodesRemoved(candidateSolution,nodeRemoved) && previousMinimumWeight - nodeWeights[nodeRemoved[0]] + insertedWeight < currentMinimumWeight){
+            //if(graph->vertexCoverValidityNodesRemoved(candidateSolution, nodeRemoved)){ 
+                double candidateWeight = previousMinimumWeight - nodeWeights[nodeRemoved[0]] + insertedWeight;
+
+                //TESTING
+                swapValidi++;
+                // uint testWeight = graph->costFunction(candidateSolution);
+                // std::cout << "candidate weight in substitute : "<<candidateWeight<<std::endl;
+                // std::cout << "test weight in substitute : "<<testWeight<<std::endl<<std::endl;
+                //TESTING
+                if(currentMinimumWeight > candidateWeight){
+                    std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
+                    currentMinimumWeight = candidateWeight;
+                }
+                
+
+                currentNumberSamples++;
+                currentObjectiveFunEvalution++;
+
+                if (currentObjectiveFunEvalution >= maximumObjectiveFunEvalution) {
+                    std::cout <<"[LSEA]: "<< "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (substitution out), LEAVING METHOD " << currentMinimumWeight << std::endl;
+                    if(previousMinimumWeight <= currentMinimumWeight){
+                        //local minimum
+                        std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+                        std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
+                        finalCost = currentMinimumWeight;
+                        return nullptr;
+                    }
+                    delete [] candidateSolution;
+                    return nullptr;
+                }
+            
+            }
+
+
+            candidateSolution[nodeRemoved[0]] = true;
+            for (auto indexSwap = candidateSwappables.begin(); indexSwap != candidateSwappables.end() ; indexSwap++) {
+                candidateSolution[*indexSwap] = false;
+            }
+
+            
+        }
+
+        //reinserting node removed from candidate solution
+        for (uint i = 0; i<nodeRemovedFromCandidateSolution.size(); i++) {
+            nodeInCandidateSolution.push_back(nodeRemovedFromCandidateSolution[i]);
+        }
+        nodeRemovedFromCandidateSolution.clear();
+
+        //1 node inserted and Its removable neighbors are removed
+        while ((currentNumberSamples - 2*sampleSizeOpt)<sampleSizeOpt && nodeNotInCandidateSolution.size() > 0 ) {
+            uint indexInserted = randomNumber(0, nodeNotInCandidateSolution.size());
+            std::vector<uint> nodeInserted{nodeNotInCandidateSolution[indexInserted]};
+            candidateSolution[nodeInserted[0]] = true;    
+            std::vector<uint> candidateSwappables = graph->getSwappablesOutOptimized(nodeInserted, candidateSolution);
+            nodeNotInCandidateSolution.erase(nodeNotInCandidateSolution.begin()+indexInserted);
+
+
+            double removedWeight = 0;
+            for (auto indexSwap = candidateSwappables.begin(); indexSwap != candidateSwappables.end() ; indexSwap++) {
+                candidateSolution[*indexSwap] = false;
+                removedWeight+=nodeWeights[*indexSwap];
+            }        
+                
+            if(nodeWeights[nodeInserted[0]]<removedWeight && graph->vertexCoverValidityNodesRemoved(candidateSolution,candidateSwappables) && previousMinimumWeight + nodeWeights[nodeInserted[0]] - removedWeight < currentMinimumWeight){
+                double candidateWeight = previousMinimumWeight + nodeWeights[nodeInserted[0]] - removedWeight;
+
+                //TESTING
+                hybridValidi++;
+                // uint testWeight = graph->costFunction(candidateSolution);
+                // std::cout << "candidate weight in substitute : "<<candidateWeight<<std::endl;
+                // std::cout << "test weight in substitute : "<<testWeight<<std::endl<<std::endl;
+                //TESTING
+                std::copy(candidateSolution, candidateSolution + numNodesGraph, solution);
+                currentMinimumWeight = candidateWeight;
+                
+
+                currentNumberSamples++;
+                currentObjectiveFunEvalution++;
+
+                if (currentObjectiveFunEvalution >= maximumObjectiveFunEvalution) {
+                    std::cout <<"[LSEA]: "<< "MAXIMUM NUMBER OF COST FUNCTION EVALUATION REACHED (substitution in ), LEAVING METHOD " << currentMinimumWeight << std::endl;
+                    if(previousMinimumWeight <= currentMinimumWeight){
+                        //local minimum
+                        std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+                        std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
+                        finalCost = currentMinimumWeight;
+                        return nullptr;
+                    }
+                    delete [] candidateSolution;
+                    return nullptr;
+                }
+            
+            }
+
+
+
+            for (auto indexSwap = candidateSwappables.begin(); indexSwap != candidateSwappables.end() ; indexSwap++) {
+                candidateSolution[*indexSwap] = true;
+            }
+            candidateSolution[nodeInserted[0]] = false;
+        
+        }
+        //TODO generalization with p remove and m insertions
+
+        if(previousMinimumWeight <= currentMinimumWeight){
+
+            //TESTING
+            std::cout << "remove : " << removeValidi << ", swap out :"<< swapValidi << ", swap in :" << hybridValidi<<std::endl;
+            globalRemove+=removeValidi;
+            globalSwap+=swapValidi;
+            globalHybrid+=hybridValidi;
+            //TESTING
+
+            //local minimum
+            std::cout <<"[LSEA]: "<< "local minimum weight: " << currentMinimumWeight << std::endl;
+            std::cout <<"[LSEA]: "<< "iteration: " << numIter << std::endl;
+            delete [] candidateSolution;
+            finalCost = currentMinimumWeight;
+            return solution;
+        }
+        
+    }
+
+    //TESTING
+    std::cout << "remove : " << removeValidi << ", swap out :"<< swapValidi << ", swap in :" << hybridValidi<<std::endl;
+    globalRemove+=removeValidi;
+    globalSwap+=swapValidi;
+    globalHybrid+=hybridValidi;
+    //TESTING
+    finalCost = currentMinimumWeight;
+    delete [] candidateSolution;
+    return solution;
+}   
+
 uint LocalSearch::getCurrentNumberOfObjectiveFunctionEval()const{
     return currentObjectiveFunEvalution;
 }

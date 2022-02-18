@@ -42,6 +42,7 @@ class LocalSearch{
         NodeBitArray startResolveWithLimitAndSampling(double &finalCost,NodeBitArray startSolution=nullptr);
         NodeBitArray startResolveWithLimitAndSamplingOptimized(double &finalCost,NodeBitArray startSolution=nullptr);
         NodeBitArray startResolveFinal(double &finalCost,NodeBitArray startSolution=nullptr);
+        NodeBitArray startResolveFinalOptimized(double &finalCost,NodeBitArray startSolution=nullptr);
 
         void setSolution(NodeBitArray solution);
         

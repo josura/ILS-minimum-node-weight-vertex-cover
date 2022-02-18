@@ -63,6 +63,7 @@ class WeightedVertexGraph{
 
         std::vector<uint> getSwappablesIn(std::vector<uint>& nodes,bool* solution);
         std::vector<uint> getSwappablesOut(std::vector<uint>& nodes,bool* solution);
+        std::vector<uint> getSwappablesOutOptimized(std::vector<uint>& nodes,bool* solution);
 
         uint getMaxDegree()const;
         double getAverageDegree()const;
