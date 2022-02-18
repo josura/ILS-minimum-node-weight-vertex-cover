@@ -1,5 +1,5 @@
 # ILS implementation for vertex cover
-Iterated Local search in production
+Iterated Local search implementation to estimate the optimal solution of the minimum weight vertex cover problem.
 
 # build
 ```bash
