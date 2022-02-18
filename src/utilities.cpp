@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <iostream>
 #include <random>
+#include <unordered_set>
+#include <vector>
 
 using namespace std;
 
@@ -73,28 +75,52 @@ NodeSet* nodeBitArrayToSet(NodeBitArray const& nodeArray, uint arraySize){
 void printNodeBitArray(NodeBitArray nodeArray,uint size){
     for (uint i = 0; i < size; i++) {
         if(nodeArray[i]){
-            cout << " true ";
+            cout << "1";
         } else {
-            cout << "false";
+            cout << "0";
         }
     }
+    cout<<endl;
 }
 
 
-uint randomNumber(uint min, uint max){
+int randomNumber(int min, int max){
+    // fixed seed because repeatability
+    //unsigned seed = 777;
     std::random_device r;
-    // range [min,max]
+    // range [min,max[
     std::default_random_engine e1(r());
-    std::uniform_int_distribution<uint> uniform_dist(min, max);
+    max = (max-1<0) ? 0 : max-1;
+    std::uniform_int_distribution<int> uniform_dist(min, max);
     return uniform_dist(e1);
 }
 
 double randomRealNumber(double min, double max){
+    // fixed seed because repeatability
+    //unsigned seed = 777;
     std::random_device r;
     // range [min,max]
     std::default_random_engine e1(r());
     std::uniform_real_distribution<double> uniform_dist(min, max);
     return uniform_dist(e1);
+}
+
+
+std::vector<uint> randomVector(int min, int max , uint size){
+    unsigned seed = std::chrono::system_clock::now()
+                        .time_since_epoch()
+                        .count();
+    // fixed seed because repeatability
+    //unsigned seed = 777;
+    std::vector<uint> v(max-min,min);
+    for (uint i = 0; i<max-min; i++) {
+        v[i] += i;
+    }
+ 
+    std::shuffle(std::begin(v), std::end(v), std::default_random_engine(seed));
+    size = (size<v.size()) ? size : v.size();
+    std::vector<uint> ret(v.begin(),v.begin()+size);
+    return ret;
 }
 
 NodeBitArray randomBooleanArray(uint size){
@@ -103,5 +129,34 @@ NodeBitArray randomBooleanArray(uint size){
         ret[i] = (randomNumber(0, 100) >=50) ? false : true;
     }
 
+    return ret;
+}
+
+
+void printUsage(std::string execName){
+    std::cout << "Usage : "<< execName << " <inputgraph>"<<std::endl;
+}
+
+
+std::string nodeBitArrayToString(NodeBitArray nodeArray,uint size){
+    std::string ret = "";
+    for (uint i = 0; i < size; i++) {
+        if(nodeArray[i]){
+             ret += "1";
+        } else {
+             ret += "0";
+        }
+    }
+    return ret;
+}
+
+
+std::unordered_set<uint> intersectionSet(std::unordered_set<uint> set1,std::unordered_set<uint> set2){
+    unordered_set<uint> ret;
+    for (auto it = set1.begin(); it != set1.end(); it++) {
+        if(set2.count(*it)>0){
+            ret.insert(*it);
+        }
+    }
     return ret;
 }

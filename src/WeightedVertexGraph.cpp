@@ -1,10 +1,12 @@
 #include "WeightedVertexGraph.h"
+#include "utilities.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -18,6 +20,7 @@ WeightedVertexGraph::WeightedVertexGraph(){
     numberOfNodes = 0;
     this->nodeWeights = nullptr;
     adjList = nullptr;
+    adjVector = nullptr;
     
 }
 
@@ -25,11 +28,8 @@ WeightedVertexGraph::WeightedVertexGraph(uint numNodes, double* nodeWeights){
     numberOfNodes = numNodes;
     this->nodeWeights = nodeWeights;
     adjList = new std::unordered_set<uint>[numNodes];
+    adjVector = new std::vector<uint>[numNodes];
     //edgesVector = new std::vector<std::pair<uint, uint>>;
-    for (int i = 0; i < numNodes; i++) {
-        adjList[i] = std::unordered_set<uint>();
-
-    }
     
 }
 
@@ -55,6 +55,8 @@ WeightedVertexGraph* WeightedVertexGraph::addEdge(uint node1, uint node2){
         edgesVector.push_back(std::pair<uint, uint>(node1,node2));
         adjList[node1].insert(node2);
         adjList[node2].insert(node1);
+        adjVector[node1].push_back(node2);
+        adjVector[node2].push_back(node1);
     }
 
     return this;
@@ -129,6 +131,21 @@ bool WeightedVertexGraph::vertexCoverValidityEdgescheckBitArray(bool* nodeSubset
     return true;
 }
 
+
+bool WeightedVertexGraph::vertexCoverValidityNodesRemoved(bool* nodeSubset,const std::vector<uint>& nodesRemoved,const std::vector<uint>& nodesAdded){
+    if (!nodeSubset) {
+        throw std::invalid_argument("cost function on null pointer");
+    }
+    for (auto it = nodesRemoved.begin(); it != nodesRemoved.end(); it++) {
+        for (auto adjIt = adjVector[*it].begin(); adjIt != adjVector[*it].end(); adjIt++) {
+            if (nodeSubset[*adjIt] == false) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 double WeightedVertexGraph::costFunction(bool* NodeSubset){
     if (!NodeSubset) {
         throw std::invalid_argument("cost function on null pointer");
@@ -144,4 +161,51 @@ double WeightedVertexGraph::costFunction(bool* NodeSubset){
 
 double WeightedVertexGraph::getNodeWeight(uint node)const{
     return nodeWeights[node];
+}
+
+std::vector<uint> WeightedVertexGraph::getSharedAdjacentNodes(std::vector<uint>& nodes){
+    std::unordered_set<uint> set = adjList[nodes[0]];
+    for (auto it = nodes.begin()+1; it != nodes.end(); it++) {
+        set = intersectionSet(set, adjList[nodes[0]]);
+    }
+    std::vector<uint> ret(set.begin(),set.end());
+    return ret;
+}
+
+std::vector<uint> WeightedVertexGraph::getSwappablesIn(std::vector<uint>& nodes,bool* solution){
+    std::vector<uint> candidateSwappables = getSharedAdjacentNodes(nodes);
+    std::vector<uint> swappables;
+    for (auto it = candidateSwappables.begin(); it!=candidateSwappables.end(); it++) {
+        if(solution[*it]==false){
+            swappables.push_back(*it);
+        }
+    }
+    return swappables;
+}
+std::vector<uint> WeightedVertexGraph::getSwappablesOut(std::vector<uint>& nodes,bool* solution){
+    std::vector<uint> candidateSwappables = getSharedAdjacentNodes(nodes);
+    std::vector<uint> swappables;
+    for (auto it = candidateSwappables.begin(); it!=candidateSwappables.end(); it++) {
+        if(solution[*it]){
+            swappables.push_back(*it);
+        }
+    }
+    return swappables;
+}
+
+
+uint WeightedVertexGraph::getMaxDegree()const{
+    uint max = 0;
+    for (uint i = 0; i<numberOfNodes; i++) {
+        if(degreeOfNode(i)>max)max=degreeOfNode(i);
+    }
+    return max;
+}
+
+double WeightedVertexGraph::getAverageDegree()const{
+    double sum = 0;
+    for (uint i = 0; i<numberOfNodes; i++) {
+        sum += degreeOfNode(i);
+    }
+    return (sum / (2*numberOfNodes));
 }

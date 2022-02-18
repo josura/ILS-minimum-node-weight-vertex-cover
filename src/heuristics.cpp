@@ -25,6 +25,26 @@ bool vertexCoverValidityEdgescheckBitList(WeightedVertexGraph *graph, NodeBitLis
 }
 
 
+bool contains(std::vector<uint> vec, const uint & elem)
+{
+    return any_of(vec.begin(), vec.end(), [&](const auto & x){
+        return x == elem;
+    });
+}
+
+bool vertexCoverValidityEdgescheckNodeList(WeightedVertexGraph *graph, NodeList& nodeSubset){
+    //TODO see if edges vector is quicker or not
+    std::pair<uint, uint>* edges = graph->getEdgesArray();
+
+    for(int i = 0; i < graph->getNumEdges(); ++i){
+        if (!contains(nodeSubset, edges[i].first ) && !contains(nodeSubset, edges[i].second )) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 //controlling all edges
 /*
  * IMPORTANT always call makeEdgesArray on the graph before this function
@@ -39,10 +59,10 @@ bool vertexCoverValidityEdgescheckBitArray(WeightedVertexGraph *graph, NodeBitAr
     return true;
 }
 
-double costFunction(WeightedVertexGraph* graph,NodeList* NodeSubset){
+double costFunction(WeightedVertexGraph* graph,NodeList& NodeSubset){
     double* nodeweights = graph->getNodeWeights();
     double sum =0;
-    for (auto it =NodeSubset->begin(); it != NodeSubset->end(); it++ ) {
+    for (auto it =NodeSubset.begin(); it != NodeSubset.end(); it++ ) {
         sum += nodeweights[*it];
     }
     return sum;
@@ -121,6 +141,74 @@ NodeSet* greedySolutionBitArray(WeightedVertexGraph *graph, NodeBitArray solutio
 }
 
 
+//OPTIMIZATION
+NodeBitArray removeRedundantNodes(WeightedVertexGraph *graph, NodeBitArray solution){
+    std::vector<uint> redundantNodes;
+    for (uint i =0 ; i< graph->getNumNodes(); i++) {
+        if(solution[i]){
+            solution[i] = false;
+            std::vector<uint> tmpNodesRemoved{i};
+            if (graph->vertexCoverValidityNodesRemoved(solution, tmpNodesRemoved)) {
+                redundantNodes.push_back(i);
+            }
+
+            solution[i] = true;
+        }
+    }
+
+    while (redundantNodes.size() > 0) {
+        uint index = randomNumber(0, redundantNodes.size());
+        solution[redundantNodes[index]] = false;
+        redundantNodes.clear();
+        for (uint i =0 ; i< graph->getNumNodes(); i++) {
+            if(solution[i]){
+                solution[i] = false;
+                std::vector<uint> tmpNodesRemoved{i};
+                if (graph->vertexCoverValidityNodesRemoved(solution, tmpNodesRemoved)) {
+                    redundantNodes.push_back(i);
+                }
+
+                solution[i] = true;
+            }
+        }
+        
+    }
+
+    return solution;
+}
+
+NodeBitArray removeRedundantNodesBest(WeightedVertexGraph *graph, NodeBitArray solution){
+    double * nodeWeights = graph->getNodeWeights();
+    bool candidatesPresence = true;
+    
+
+    do {
+        double max = 0;
+        uint indexMax=-1;
+        candidatesPresence = false;
+        for (uint i =0 ; i< graph->getNumNodes(); i++) {
+            if(solution[i]){
+                solution[i] = false;
+                std::vector<uint> tmpNodesRemoved{i};
+                if (graph->vertexCoverValidityNodesRemoved(solution, tmpNodesRemoved) && nodeWeights[i] > max) {
+                    candidatesPresence = true;
+                    max = nodeWeights[i];
+                    indexMax = i;
+                }
+
+                solution[i] = true;
+            }
+        }
+        if (candidatesPresence) {
+            solution[indexMax] = false;
+        }
+        
+    } while (candidatesPresence);
+
+    return solution;
+}
+//OPTIMIZATION
+
 
 NodeBitArray randomGreedySolutionBitArrayFromPartial(WeightedVertexGraph *graph, NodeBitArray solution){
     std::pair<uint, uint>* edges = graph->getEdgesArray();
@@ -133,28 +221,44 @@ NodeBitArray randomGreedySolutionBitArrayFromPartial(WeightedVertexGraph *graph,
     }
 
     do {
-        uint i = randomNumber(0,edgesNotCovered.size()-1);
+        int i = randomNumber(0,edgesNotCovered.size());
 
         auto it = edgesNotCovered.begin();
         for(uint j=0;j<i;j++){it++;}
-        
-        std::pair<uint, uint> candidatePair = *it; 
-        solution[candidatePair.first] = true;
-        solution[candidatePair.second] = true;
-
-        for ( auto it = graph->getAdjList(candidatePair.first)->begin() ; it != graph->getAdjList(candidatePair.first)->end(); it++){
-            std::pair<uint, uint> pair (candidatePair.first,*it);
-            edgesNotCovered.erase(pair);
-        }
-        for ( auto it = graph->getAdjList(candidatePair.second)->begin() ; it != graph->getAdjList(candidatePair.second)->end(); it++){
-            std::pair<uint, uint> pair (candidatePair.second,*it);
-            edgesNotCovered.erase(pair);
+        if (it!=edgesNotCovered.end()) {
+            std::pair<uint, uint> candidatePair = *it;
+            double test = randomRealNumber(0, 100);
+            if(test < 33.333){
+                solution[candidatePair.first] = true;
+                for ( auto it = graph->getAdjList(candidatePair.first)->begin() ; it != graph->getAdjList(candidatePair.first)->end(); it++){
+                    std::pair<uint, uint> pair (candidatePair.first,*it);
+                    edgesNotCovered.erase(pair);
+                }
+            }else if(test >= 33.333 && test < 66.666){
+                solution[candidatePair.second] = true;
+                for ( auto it = graph->getAdjList(candidatePair.second)->begin() ; it != graph->getAdjList(candidatePair.second)->end(); it++){
+                    std::pair<uint, uint> pair (candidatePair.second,*it);
+                    edgesNotCovered.erase(pair);
+                }
+            }else {
+                solution[candidatePair.first] = true;
+                for ( auto it = graph->getAdjList(candidatePair.first)->begin() ; it != graph->getAdjList(candidatePair.first)->end(); it++){
+                    std::pair<uint, uint> pair (candidatePair.first,*it);
+                    edgesNotCovered.erase(pair);
+                }
+                solution[candidatePair.second] = true;
+                for ( auto it = graph->getAdjList(candidatePair.second)->begin() ; it != graph->getAdjList(candidatePair.second)->end(); it++){
+                    std::pair<uint, uint> pair (candidatePair.second,*it);
+                    edgesNotCovered.erase(pair);
+                }        
+            }
         }
 
     }while (edgesNotCovered.size()>0);
 
     bool test = graph->vertexCoverValidityEdgescheckBitArray(solution);
 
+    //return removeRedundantNodesBest(graph, solution);
     return solution;
 }
 
@@ -232,6 +336,15 @@ NodeBitArray randomSmartSolutionBitArrayFromPartial(WeightedVertexGraph *graph, 
     bool test = graph->vertexCoverValidityEdgescheckBitArray(solution);
 
 
-    return solution;
+    //return removeRedundantNodesBest(graph, solution);
+    return  solution;
 }
 
+
+NodeBitArray randomGreedySolutionAndRemoves(WeightedVertexGraph *graph, NodeBitArray solution){
+    return removeRedundantNodesBest(graph, randomGreedySolutionBitArrayFromPartial(graph, solution));
+}
+
+NodeBitArray randomSmartSolutionAndRemoves(WeightedVertexGraph *graph, NodeBitArray solution){
+    return removeRedundantNodesBest(graph, randomSmartSolutionBitArrayFromPartial(graph, solution));
+}

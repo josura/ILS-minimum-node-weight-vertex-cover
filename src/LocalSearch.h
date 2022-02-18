@@ -21,8 +21,16 @@ class LocalSearch{
 
         double samplingFactor;
 
+        uint removesDepth;
+
+        bool recursiveDepth;
+
     public:
-        LocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations=500,double samplingFactor=100);
+        //TESTING
+        uint globalRemove = 0,globalSwap = 0,globalHybrid = 0; 
+        //TESTING
+
+        LocalSearch(WeightedVertexGraph* _graph,double samplingFactor=7,int depthOfRemoves = 50, bool recursiveDepth = true, uint numberOfIterations=500);
 
         ~LocalSearch();     
 
@@ -32,6 +40,8 @@ class LocalSearch{
         NodeBitArray startResolveOptimized(double &finalCost,NodeBitArray startSolution=nullptr);
         NodeBitArray startResolveWithLimit(double &finalCost,NodeBitArray startSolution=nullptr);
         NodeBitArray startResolveWithLimitAndSampling(double &finalCost,NodeBitArray startSolution=nullptr);
+        NodeBitArray startResolveWithLimitAndSamplingOptimized(double &finalCost,NodeBitArray startSolution=nullptr);
+        NodeBitArray startResolveFinal(double &finalCost,NodeBitArray startSolution=nullptr);
 
         void setSolution(NodeBitArray solution);
         

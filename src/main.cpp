@@ -24,8 +24,11 @@ int main(int argc, char** argv)
     WeightedVertexGraph* graph;
     ifstream input (argv[1]);
     if (input.fail()) {
-        cerr <<"[MAIN]: "<< "input failed";
+        cerr <<"[MAIN]: "<< "input failed"<<endl;
+        printUsage("vertex_cover");
+        return 0;
     }
+
     if (input.is_open())
     {
         string numNodesStr;
@@ -91,13 +94,13 @@ int main(int argc, char** argv)
         // double cost;
 
         // auto started = std::chrono::high_resolution_clock::now();
-        // NodeBitArray solution = localSearch->startResolveWithLimit(cost);
+        // NodeBitArray solution = localSearch->startResolveWithLimitAndSamplingOptimized(cost);
         // auto done = std::chrono::high_resolution_clock::now();
         
-        // //NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
+        // NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
 
-        // //if(vertexCoverValidityEdgescheckBitArray(graph, solution))
-        // //    cout << "final solution: " << *solutionList << endl;
+        // if(vertexCoverValidityEdgescheckBitArray(graph, solution))
+        //    cout << "final solution: " << *solutionList << endl;
 
         // cout << "solution weight:" << localSearch->getSolutionWeight() << " algorithm weight"<< cost << endl;
 
@@ -105,14 +108,16 @@ int main(int argc, char** argv)
         //ILS testing
         IteratedLocalSearch* ILS = new IteratedLocalSearch(graph);
 
+            
         auto started = std::chrono::high_resolution_clock::now();
         NodeBitArray solution = ILS->startResolve();
         auto done = std::chrono::high_resolution_clock::now();
         
-        //NodeList* solutionList = nodeBitArrayToList(solution,graph->getNumNodes());
 
-        //if(vertexCoverValidityEdgescheckBitArray(graph, solution))
-        //    cout << "final solution: " << *solutionList << endl;
+        if(vertexCoverValidityEdgescheckBitArray(graph, solution))
+            printNodeBitArray(solution, graph->getNumNodes());
+
+        cout << "nodes: "<<graph->getNumNodes() << ", edges: " << graph->getNumEdges()<< ", objevalopit:"<<ILS->getObjectiveEvalForOptimum()<< endl;
 
         cout <<"[MAIN]: "<< "solution weight:" << ILS->getSolutionWeight() << endl;
 

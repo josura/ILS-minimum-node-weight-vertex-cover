@@ -14,6 +14,7 @@ class WeightedVertexGraph{
         uint numberOfEdges=0;
         double* nodeWeights;
         std::unordered_set<uint>* adjList;
+        std::vector<uint>* adjVector;
         std::vector<std::pair<uint, uint> > edgesVector;
         std::pair<uint, uint>* edgesArray;
 
@@ -54,6 +55,16 @@ class WeightedVertexGraph{
 
         bool vertexCoverValidityEdgescheckBitArray(bool* nodeSubset);
 
+        bool vertexCoverValidityNodesRemoved(bool* nodeSubset,const std::vector<uint>& nodesRemoved,const std::vector<uint>& nodesAdded = std::vector<uint>());
+
         double costFunction(bool* NodeSubset);
+
+        std::vector<uint> getSharedAdjacentNodes(std::vector<uint>& nodes);
+
+        std::vector<uint> getSwappablesIn(std::vector<uint>& nodes,bool* solution);
+        std::vector<uint> getSwappablesOut(std::vector<uint>& nodes,bool* solution);
+
+        uint getMaxDegree()const;
+        double getAverageDegree()const;
 
 };

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <unordered_set>
@@ -12,7 +13,8 @@
 #include <vector>
 #include <bitset>
 #include <random>
-
+#include <chrono>
+#include <algorithm>
 
 #include "WeightedVertexGraph.h"
 
@@ -34,7 +36,15 @@ NodeSet* nodeBitArrayToSet(NodeBitArray const& nodeArray,uint arraySize);
 
 void printNodeBitArray(NodeBitArray nodeArray,uint size);
 
-uint randomNumber(uint min, uint max);
+int randomNumber(int min, int max);
 double randomRealNumber(double min, double max);
 
+std::vector<uint> randomVector(int min, int max , uint size);
+
 NodeBitArray randomBooleanArray(uint size);
+
+void printUsage(std::string execName);
+
+std::string nodeBitArrayToString(NodeBitArray nodeArray,uint size);
+
+std::unordered_set<uint> intersectionSet(std::unordered_set<uint> set1,std::unordered_set<uint> set2);

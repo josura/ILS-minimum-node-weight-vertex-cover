@@ -23,6 +23,8 @@ class IteratedLocalSearch{
 
         double probabilityBadSolution;
 
+        double propagationProportion;
+
         uint maxNumberOfIterations;
 
         uint maxNumberOfIterationsWithouthImprovement;
@@ -33,23 +35,29 @@ class IteratedLocalSearch{
 
         NodeBitArray bestSolution;
 
+        //things required for the relation
+        int objectiveEvalForOptimum=0;
+
 
 
     public:
-        IteratedLocalSearch(WeightedVertexGraph* _graph,uint numberOfIterations=500, uint numberofIterationsWithouthImprovement=5, 
-            double startingPower=10, 
+        IteratedLocalSearch(WeightedVertexGraph* _graph,double startingPropagationProportion=5,uint numberOfIterations=100000, uint numberofIterationsWithouthImprovement=100000, 
+            double startingPower=5, 
             double startingRarity = 50, 
-            double startingProbabilityBadSolution=0
+            double startingProbabilityBadSolution=0.1
         );
 
         ~IteratedLocalSearch();     
 
         NodeBitArray simplePerturbationSolution(NodeBitArray solution);
+        NodeBitArray randomPerturbationSolution(NodeBitArray solution);
+        NodeBitArray randomDistributedPerturbationSolution(NodeBitArray solution);
+        NodeBitArray randomDistributedPerturbationAndRemoves(NodeBitArray solution);
 
-        void adjustPerturbationPowerAndRarity(uint iterationWithoutImprovement, uint iterationWithImprovement);
+        void adjustPerturbationPowerAndRarity(int iterationWithoutImprovement, int iterationWithImprovement);
 
 
-        void adjustProbabilityOfBadSolutions(uint iterationWithoutImprovement, uint iterationWithImprovement,uint badSolutionsAccepted);
+        void adjustProbabilityOfBadSolutions(int iterationWithoutImprovement, int iterationWithImprovement,int badSolutionsAccepted);
 
         NodeBitArray startResolve();
         
@@ -57,4 +65,12 @@ class IteratedLocalSearch{
         NodeSet* getSolutionSet()const;
 
         double getSolutionWeight()const;
+
+        double getPower()const;
+
+        double getRarity()const;
+
+        double getProbabilityBadSolution()const;
+
+        int getObjectiveEvalForOptimum()const;
 };
